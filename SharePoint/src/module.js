@@ -36,7 +36,6 @@ const convert = require('xml-js');
             input.context.getFullContext()["itemCreated"] = true;
             resolve(input);
         } else {
-            input.context.getFullContext()["itemCreated"] = false;
             reject("createList statusCode != 201");
         }
     });
