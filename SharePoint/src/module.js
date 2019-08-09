@@ -11,20 +11,20 @@ const convert = require('xml-js');
  * @arg {SecretSelect} `secret` Secret containing SharePoint clientId, clientSecret, tenantId
  */
  async function createListElement(input, args) {
-    if (!args.secret || !args.secret.clientId || !args.secret.clientSecret || !args.secret.tenantId) return Promise.reject("Secret not defined or invalid.");
+    if (!args.secret||!args.secret.clientId||!args.secret.clientSecret||!args.secret.tenantId) return Promise.reject("Secret not defined or invalid.");
     if (!args.siteDomain) return Promise.reject("No SiteDomain defined.");
     if (!args.siteCollection) return Promise.reject("No SiteCollection defined.");
     if (!args.listName) return Promise.reject("No ListName defined.");
     if (!args.listItem) return Promise.reject("No ListItem defined");
     
-    const listUrl = `https://conetde.sharepoint.com/sites/${args.siteCollection}/_api/web/lists/getbytitle('${args.listName}')/items`;
+    const apiEndpoint = `https://${args.siteDomain}/sites/${args.siteCollection}/_api/web/lists/getbytitle('${args.listName}')/items`;
     const accessToken = await getAccessToken(args);
     const headers = {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
     };
 
-    const res = await fetch(listUrl, {
+    const res = await fetch(apiEndpoint, {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(args.listItem)
@@ -51,18 +51,18 @@ module.exports.createListElement = createListElement;
  * @arg {SecretSelect} `secret` Secret containing SharePoint clientId, clientSecret, tenantId
  */
 async function getListElements(input, args) {
-    if (!args.secret || !args.secret.clientId || !args.secret.clientSecret || !args.secret.tenantId) return Promise.reject("Secret not defined or invalid.");
+    if (!args.secret||!args.secret.clientId||!args.secret.clientSecret||!args.secret.tenantId) return Promise.reject("Secret not defined or invalid.");
     if (!args.siteDomain) return Promise.reject("No SiteDomain defined.");
     if (!args.siteCollection) return Promise.reject("No SiteCollection defined.");
     if (!args.listName) return Promise.reject("No ListName defined.");
 
-    const listUrl = `https://conetde.sharepoint.com/sites/${args.siteCollection}/_api/web/lists/getbytitle('${args.listName}')/items`;
+    const apiEndpoint = `https://${args.siteDomain}/sites/${args.siteCollection}/_api/web/lists/getbytitle('${args.listName}')/items`;
     const accessToken = await getAccessToken(args);
     const headers = {
         'Authorization': `Bearer ${accessToken}`
     };
 
-    const listItems = await fetch(listUrl, {
+    const listItems = await fetch(apiEndpoint, {
         method: 'GET',
         headers: headers
     })
