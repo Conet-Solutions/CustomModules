@@ -88,11 +88,11 @@ async function getAccessToken(args) {
     params.append('resource', `00000003-0000-0ff1-ce00-000000000000/${args.siteDomain}@${args.secret.tenantId}`);
 
     const res = await fetch(authServer, {
-            method: 'POST',
-            body: params
-        })
-        .then(res => res.json())
-        .catch(err => Promise.reject(err));
+        method: 'POST',
+        body: params
+    })
+    .then(res => res.json())
+    .catch(err => Promise.reject(err));
 
     return res.access_token;
 }
