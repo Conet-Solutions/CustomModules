@@ -7,7 +7,7 @@ const convert = require('xml-js');
  * @arg {String} `siteDomain` Domain of your SharePoint instance
  * @arg {String} `siteCollection` The SiteCollection containing your list
  * @arg {String} `listName` Name of your SharePoint list
- * @arg {JSON} `listItem` The item you want to add
+ * @arg {CognigyScript} `listItem` The item you want to add (Stringified JS Object)
  * @arg {SecretSelect} `secret` Secret containing SharePoint clientId, clientSecret, tenantId
  */
  async function createListElement(input, args) {
@@ -24,20 +24,29 @@ const convert = require('xml-js');
         'Content-Type': 'application/json'
     };
 
+    let statusCode;
     const res = await fetch(apiEndpoint, {
         method: 'POST',
         headers: headers,
-        body: JSON.stringify(args.listItem)
+        body: args.listItem
+    })
+    .then(res => {
+        statusCode = res.status;
+        return res.text();
     })
     .catch(err => Promise.reject(err));
+
+    const resJson = JSON.parse(convert.xml2json(res, {compact: true, spaces: 4}));
   
     return new Promise((resolve, reject) => {
-        if (res.status === 201) {
+        if (statusCode === 201) {
             input.context.getFullContext()["itemCreated"] = true;
-            resolve(input);
+            input.context.getFullContext()["itemUrl"] = `https://${args.siteDomain}/sites/${args.siteCollection}/Lists/${args.listName}/DispForm.aspx?ID=${resJson.entry.content['m:properties']['d:Id']._text}`;
         } else {
-            reject("createList statusCode != 201");
+            input.context.getFullContext()["itemCreated"] = false;
+            input.context.getFullContext()["sharePointErr"] = resJson['m:error']['m:message']._text;
         }
+        resolve(input);
     });
 }
 
@@ -77,6 +86,41 @@ async function getListElements(input, args) {
 }
 
 module.exports.getListElements = getListElements;
+
+/**
+ * Get list elements from a given SharePoint list
+ * @arg {String} `siteDomain` Domain of your SharePoint instance
+ * @arg {String} `siteCollection` The SiteCollection containing your list
+ * @arg {String} `listName` Name of your SharePoint list
+ * @arg {SecretSelect} `secret` Secret containing SharePoint clientId, clientSecret, tenantId
+ */
+async function getListItemCount(input, args) {
+    if (!args.secret||!args.secret.clientId||!args.secret.clientSecret||!args.secret.tenantId) return Promise.reject("Secret not defined or invalid.");
+    if (!args.siteDomain) return Promise.reject("No SiteDomain defined.");
+    if (!args.siteCollection) return Promise.reject("No SiteCollection defined.");
+    if (!args.listName) return Promise.reject("No ListName defined.");
+
+    const apiEndpoint = `https://${args.siteDomain}/sites/${args.siteCollection}/_api/web/lists/getbytitle('${args.listName}')/itemcount`;
+    const accessToken = await getAccessToken(args);
+    const headers = {
+        'Authorization': `Bearer ${accessToken}`
+    };
+
+    const itemCount = await fetch(apiEndpoint, {
+        method: 'GET',
+        headers: headers
+    })
+    .then(res => res.text())
+    .catch(err => Promise.reject(err));
+
+    input.context.getFullContext()["itemCount"] = JSON.parse(convert.xml2json(itemCount, {compact: true, spaces: 4}))['d:ItemCount']._text;
+
+    return new Promise((resolve, reject) => {
+        resolve(input);
+    });
+}
+
+module.exports.getListItemCount = getListItemCount;
 
 // Helper function to get AccessToken
 async function getAccessToken(args) {
