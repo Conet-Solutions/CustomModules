@@ -10,7 +10,7 @@ const convert = require('xml-js');
  * @arg {CognigyScript} `listItem` The item you want to add (Stringified JS Object)
  * @arg {SecretSelect} `secret` Secret containing SharePoint clientId, clientSecret, tenantId
  */
- async function createListElement(input, args) {
+async function createListElement(input, args) {
     if (!args.secret||!args.secret.clientId||!args.secret.clientSecret||!args.secret.tenantId) return Promise.reject("Secret not defined or invalid.");
     if (!args.siteDomain) return Promise.reject("No SiteDomain defined.");
     if (!args.siteCollection) return Promise.reject("No SiteCollection defined.");
