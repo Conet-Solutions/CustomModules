@@ -1,0 +1,26 @@
+{
+  "name": "graphapi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/module.js",
+  "scripts": {
+    "start": "npm run transpile && npm run lint && node build/module.js",
+    "transpile": "tsc -p .",
+    "zip": "zip graphapi.zip build/* package.json package-lock.json README.md",
+    "build": "npm run transpile && npm run lint && npm run zip",
+    "lint": "tslint -c tslint.json src/**/*.ts"
+  },
+  "author": "Manuel Braun",
+  "license": "ISC",
+  "dependencies": {
+    "@microsoft/microsoft-graph-client": "^2.0.0",
+    "es6-promise": "^4.2.8",
+    "isomorphic-fetch": "^2.2.1"
+  },
+  "devDependencies": {
+    "@microsoft/microsoft-graph-types": "^1.12.0",
+    "@types/node": "^13.7.7",
+    "tslint": "^6.0.0",
+    "typescript": "^3.8.3"
+  }
+}
