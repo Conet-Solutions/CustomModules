@@ -1,26 +1,34 @@
-import "isomorphic-fetch";
+import * as fetch from 'node-fetch';
 import { AuthenticationProvider } from "@microsoft/microsoft-graph-client";
 
 export class GraphAuthenticationProvider implements AuthenticationProvider {
-	private host: string;
-	private tenantId: string;
-	private clientId: string;
+  private host: string = "login.microsoftonline.com";
+  private authServer: string;
+  private clientId: string;
+  private clientSecret: string;
 
-	constructor(host: string, tenantId: string, clientId: string) {
-		this.host = host;
-		this.tenantId = tenantId;
-		this.clientId = clientId;
+	constructor(tenantId: string, clientId: string, clientSecret: string) {
+    this.authServer = `https://${this.host}/${tenantId}/oauth2/v2.0/token`;
+    this.clientId = clientId;
+    this.clientSecret = clientSecret;
 	}
 
-  /**
-   * This method will get called before every request to the msgraph server
-   * This should return a Promise that resolves to an accessToken (in case of success) or rejects with error (in case of failure)
-   * Basically this method will contain the implementation for getting and refreshing accessTokens
-   */
-  public async getAccessToken(): Promise<string> {
-    const token = fetch(
-      "https://jsonplaceholder.typicode.com/todos/1"
-    ).then(response => response.json());
-    return token;
+  async getAccessToken(): Promise<string> {
+    const params = new URLSearchParams();
+    params.append("grant_type", "client_credentials");
+    params.append("client_id", this.clientId);
+    params.append("client_secret", this.clientSecret);
+    params.append("scope", "https://graph.microsoft.com/.default");
+
+    return fetch.default(this.authServer, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: params
+    })
+    .then(res => res.json())
+    .then(json => json.access_token)
+    .catch(err => Promise.reject(`Error fetching access token: ${err}`));
   }
 }
