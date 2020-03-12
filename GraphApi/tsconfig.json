@@ -18,7 +18,8 @@
     "./vscode"
   ],
   "include": [
-    "../../common/cognigy.d.ts",
+    "src/types/cognigy.d.ts",
+    "src/types/graph.d.ts",
     "src/**/*"
   ]
 }
