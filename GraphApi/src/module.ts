@@ -4,7 +4,7 @@ import { GraphAuthenticationProvider } from "./authProvider";
 
 /**
  * Get Sharepoint list by ID / name
- * @arg {SecretSelect} `secret` Secret containing SharePoint tenantId, clientId, clientSecret
+ * @arg {SecretSelect} `secret` Secret containing Graph tenantId, clientId, clientSecret
  * @arg {CognigyScript} `siteCollectionHost` Your SharePoint host: <your-org.sharepoint.com>
  * @arg {CognigyScript} `siteName` Name or ID of the site
  * @arg {CognigyScript} `listName` Name or ID of the list
@@ -15,20 +15,16 @@ async function getSharePointList(
   input: IFlowInput,
   args: ISharePointArgs
 ): Promise<IFlowInput> {
-  // Check params
   checkSharepointParams(args);
   const { secret, siteCollectionHost, siteName, listName, contextStore } = args;
 
-  // Get authorized client
   const graph = getAuthenticatedGraphClient(secret);
 
-  // Request list
   const list = await graph
     .api(`/sites/${siteCollectionHost}:/sites/${siteName}:/lists/${listName}/`)
     .get()
     .catch(err => Promise.reject(`Error fetching SharePoint list: ${err}`));
 
-  // Add result to context
   input.actions.addToContext(contextStore, list, "simple");
 
   return input;
