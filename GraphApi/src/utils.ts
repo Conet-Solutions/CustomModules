@@ -21,9 +21,11 @@ export function checkSharepointParams(args: ISharePointArgs): Promise<never> {
   if (!siteCollectionHost)
     return Promise.reject("No siteCollectionsHost defined.");
 
-  if (!siteName) return Promise.reject("No siteName / siteID defined.");
+  if (!siteName) 
+    return Promise.reject("No siteName / siteID defined.");
 
-  if (!listName) return Promise.reject("No listName / listID defined.");
+  if (!listName)
+    return Promise.reject("No listName / listID defined.");
 
   if (!contextStore)
     return Promise.reject(

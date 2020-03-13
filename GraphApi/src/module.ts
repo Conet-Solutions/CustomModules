@@ -14,7 +14,7 @@ async function getSharePointList(
   input: IFlowInput,
   args: ISharePointArgs
 ): Promise<IFlowInput> {
-  checkSharepointParams(args);
+  await checkSharepointParams(args);
   const { secret, siteCollectionHost, siteName, listName, contextStore } = args;
 
   const graph = getAuthenticatedGraphClient(secret);
@@ -22,7 +22,7 @@ async function getSharePointList(
   const list = await graph
     .api(`/sites/${siteCollectionHost}:/sites/${siteName}:/lists/${listName}/`)
     .get()
-    .catch(err => Promise.reject(`Error fetching SharePoint list: ${err}`));
+    .catch(err => Promise.reject(`Error fetching SharePoint list: ${JSON.stringify(err)}`));
 
   input.actions.addToContext(contextStore, list, "simple");
 
